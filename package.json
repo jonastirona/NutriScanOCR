@@ -1,0 +1,31 @@
+{
+  "name": "nutriscanocr",
+  "version": "1.0.0",
+  "description": "API for extracting nutritional information from food labels using OCR and ML.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/jonastirona/NutriScanOCR.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/jonastirona/NutriScanOCR/issues"
+  },
+  "homepage": "https://github.com/jonastirona/NutriScanOCR#readme",
+  "dependencies": {
+    "aws-sdk": "^2.1692.0",
+    "dotenv": "^16.4.7",
+    "express": "^4.21.2"
+  },
+  "devDependencies": {
+    "@types/express": "^5.0.0",
+    "@types/node": "^22.10.5",
+    "nodemon": "^3.1.9",
+    "typescript": "^5.7.3"
+  }
+}
