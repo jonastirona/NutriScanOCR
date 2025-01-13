@@ -24,10 +24,11 @@ jobs:
     - name: Build
       run: npm run build
       
-    - name: Test
+    - name: Run tests (placeholder)
       run: npm test
       
     - name: Configure AWS credentials
+      if: github.ref == 'refs/heads/main'  # Only run on main branch
       uses: aws-actions/configure-aws-credentials@v1
       with:
         aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}

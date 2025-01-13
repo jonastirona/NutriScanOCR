@@ -4,8 +4,11 @@
   "description": "API for extracting nutritional information from food labels using OCR and ML.",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "build": "tsc"
+    "start": "node dist/app.js",
+    "dev": "nodemon src/app.ts",
+    "build": "tsc",
+    "test": "echo \"No tests implemented yet\" && exit 0",
+    "lint": "eslint . --ext .ts"
   },
   "repository": {
     "type": "git",
