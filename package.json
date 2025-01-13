@@ -24,11 +24,15 @@
   "dependencies": {
     "aws-sdk": "^2.1692.0",
     "dotenv": "^16.4.7",
-    "express": "^4.21.2"
+    "express": "^4.21.2",
+    "multer": "^1.4.5-lts.1",
+    "sharp": "^0.33.5"
   },
   "devDependencies": {
     "@types/express": "^5.0.0",
+    "@types/multer": "^1.4.12",
     "@types/node": "^22.10.5",
+    "@types/sharp": "^0.31.1",
     "nodemon": "^3.1.9",
     "typescript": "^5.7.3"
   }
