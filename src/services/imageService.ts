@@ -1,20 +1,26 @@
-import { S3 } from 'aws-sdk';
+import { S3Client, PutObjectCommand } from '@aws-sdk/client-s3';
+import { Upload } from '@aws-sdk/lib-storage';
 import sharp from 'sharp';
 
 export class ImageService {
-    private s3: S3;
+    private s3: S3Client;
     private bucketName: string;
 
     constructor() {
-        this.s3 = new S3();
-        this.bucketName = process.env.AWS_S3_BUCKET_NAME || '';
+        this.s3 = new S3Client({ region: process.env.AWS_S3_BUCKET_REGION });
+        this.bucketName = process.env.AWS_S3_BUCKET || '';
+        console.log('Bucket Name:', this.bucketName);
+
+        if (!this.bucketName) {
+            throw new Error('AWS_S3_BUCKET environment variable is not set');
+        }
     }
 
     async preprocessImage(buffer: Buffer): Promise<Buffer> {
         return sharp(buffer)
-            .resize(1200, 1200, { 
+            .resize(1200, 1200, {
                 fit: 'inside',
-                withoutEnlargement: true 
+                withoutEnlargement: true
             })
             .normalize()
             .sharpen()
@@ -23,7 +29,7 @@ export class ImageService {
 
     async uploadImage(buffer: Buffer, filename: string): Promise<string> {
         const processedBuffer = await this.preprocessImage(buffer);
-        
+
         const params = {
             Bucket: this.bucketName,
             Key: `uploads/${Date.now()}-${filename}`,
@@ -31,7 +37,12 @@ export class ImageService {
             ContentType: 'image/jpeg'
         };
 
-        const result = await this.s3.upload(params).promise();
-        return result.Key;
+        const upload = new Upload({
+            client: this.s3,
+            params
+        });
+
+        const result = await upload.done();
+        return result.Key || '';
     }
 }
