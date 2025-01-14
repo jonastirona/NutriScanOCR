@@ -14,9 +14,9 @@ jobs:
     - uses: actions/checkout@v2
     
     - name: Use Node.js
-      uses: actions/setup-node@v2
+      uses: actions/setup-node@v3
       with:
-        node-version: '16.x'
+        node-version: '18.17.0'
         
     - name: Install dependencies
       run: npm ci
@@ -24,11 +24,11 @@ jobs:
     - name: Build
       run: npm run build
       
-    - name: Run tests (placeholder)
+    - name: Run tests
       run: npm test
       
     - name: Configure AWS credentials
-      if: github.ref == 'refs/heads/main'  # Only run on main branch
+      if: github.ref == 'refs/heads/main'
       uses: aws-actions/configure-aws-credentials@v1
       with:
         aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
