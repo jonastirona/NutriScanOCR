@@ -9,7 +9,7 @@ export class UploadController {
         this.imageService = new ImageService();
     }
 
-    // method to upload an image
+    // method to upload an image and extract text
     async uploadImage(req: Request, res: Response): Promise<void> {
         try {
             if (!req.file) {
@@ -17,14 +17,14 @@ export class UploadController {
                 return;
             }
 
-            const text = await this.imageService.uploadImage(
+            const parsedData = await this.imageService.uploadImage(
                 req.file.buffer,
                 req.file.originalname
             );
 
             res.status(200).json({
                 message: 'Image uploaded and text extracted successfully',
-                text
+                data: parsedData
             });
         } catch (error) {
             console.error('Upload error:', error);
