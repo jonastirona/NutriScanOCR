@@ -17,18 +17,18 @@ export class UploadController {
                 return;
             }
 
-            const imageKey = await this.imageService.uploadImage(
+            const text = await this.imageService.uploadImage(
                 req.file.buffer,
                 req.file.originalname
             );
 
             res.status(200).json({
-                message: 'Image uploaded successfully',
-                imageKey
+                message: 'Image uploaded and text extracted successfully',
+                text
             });
         } catch (error) {
             console.error('Upload error:', error);
-            res.status(500).json({ error: 'Failed to upload image' });
+            res.status(500).json({ error: 'Failed to upload image and extract text' });
         }
     }
 }
