@@ -26,8 +26,8 @@ NutriScan OCR API is a serverless solution that helps extract nutritional inform
 
 ## 📝 Current Progress
 
-- Set up environment, architecture planning.
-- Implement image upload and preprocessing.
+- Set up environment, architecture planning
+- Implement image upload and preprocessing
 
 ## 📄 License
 
