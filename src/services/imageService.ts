@@ -1,15 +1,18 @@
 import { S3Client, PutObjectCommand } from '@aws-sdk/client-s3';
 import { Upload } from '@aws-sdk/lib-storage';
 import sharp from 'sharp';
+import { TextractClient, DetectDocumentTextCommand } from '@aws-sdk/client-textract';
 
 // class to preprocess and upload images to an S3 bucket
 export class ImageService {
     private s3: S3Client;
+    private textract: TextractClient;
     private bucketName: string;
 
     // initialize the S3 client and bucket name
     constructor() {
         this.s3 = new S3Client({ region: process.env.AWS_S3_BUCKET_REGION });
+        this.textract = new TextractClient({ region: process.env.AWS_S3_BUCKET_REGION });
         this.bucketName = process.env.AWS_S3_BUCKET || '';
         console.log('Bucket Name:', this.bucketName);
 
@@ -47,6 +50,32 @@ export class ImageService {
         });
 
         const result = await upload.done();
-        return result.Key || '';
+        const imageKey = result.Key || '';
+
+        // trigger Textract after uploading the image
+        const text = await this.extractTextFromImage(imageKey);
+        return text;
+    }
+
+    // extract text from the uploaded image using Textract
+    async extractTextFromImage(imageKey: string): Promise<string> {
+        const params = {
+            Document: {
+                S3Object: {
+                    Bucket: this.bucketName,
+                    Name: imageKey
+                }
+            }
+        };
+
+        const command = new DetectDocumentTextCommand(params);
+        const response = await this.textract.send(command);
+
+        // default parsing function to return the text
+        const text = response.Blocks?.filter(block => block.BlockType === 'LINE')
+            .map(block => block.Text)
+            .join('\n') || '';
+
+        return text;
     }
 }
