@@ -26,6 +26,12 @@ describe('POST /api/upload', () => {
         expect(response.status).toBe(200);
         expect(response.body).toHaveProperty('message', 'Image uploaded and text extracted successfully');
         expect(response.body).toHaveProperty('text');
+
+        // Log the extracted text
+        console.log('Extracted Text:', response.body.text);
+
+        // Update the assertion to check for a known substring in the extracted text
+        expect(response.body.text).toContain('Nutrition Facts');
     });
 
     // test to check if an error is returned when no image file is provided
