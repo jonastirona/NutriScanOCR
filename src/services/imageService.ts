@@ -16,7 +16,6 @@ export class ImageService {
         this.textract = new TextractClient({ region: process.env.AWS_S3_BUCKET_REGION });
         this.parsingService = new ParsingService();
         this.bucketName = process.env.AWS_S3_BUCKET || '';
-        console.log('Bucket Name:', this.bucketName);
 
         if (!this.bucketName) {
             throw new Error('AWS_S3_BUCKET environment variable is not set');

@@ -27,9 +27,6 @@ describe('POST /api/upload', () => {
         expect(response.body).toHaveProperty('message', 'Image uploaded and text extracted successfully');
         expect(response.body).toHaveProperty('data');
 
-        // log parsed data
-        console.log('Parsed Data:', response.body.data);
-
         // update the assertion to check for known fields in the parsed data
         expect(response.body.data).toHaveProperty('calories');
         expect(response.body.data).toHaveProperty('totalFat');
