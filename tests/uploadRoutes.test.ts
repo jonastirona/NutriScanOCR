@@ -12,10 +12,10 @@ const app = express();
 app.use(express.json());
 app.use('/api', uploadRoutes);
 
-// health check endpoint
+// Test the POST /api/upload route
 describe('POST /api/upload', () => {
-    // test to check if the health check endpoint is working
-    it('should upload an image and return the extracted text', async () => {
+    // test to upload an image and extract text
+    it('should upload an image and return the parsed data', async () => {
         const imagePath = path.join(__dirname, 'test_image.jpeg');
         const imageBuffer = fs.readFileSync(imagePath);
 
@@ -25,16 +25,17 @@ describe('POST /api/upload', () => {
 
         expect(response.status).toBe(200);
         expect(response.body).toHaveProperty('message', 'Image uploaded and text extracted successfully');
-        expect(response.body).toHaveProperty('text');
+        expect(response.body).toHaveProperty('data');
 
-        // Log the extracted text
-        console.log('Extracted Text:', response.body.text);
+        // log parsed data
+        console.log('Parsed Data:', response.body.data);
 
-        // Update the assertion to check for a known substring in the extracted text
-        expect(response.body.text).toContain('Nutrition Facts');
+        // update the assertion to check for known fields in the parsed data
+        expect(response.body.data).toHaveProperty('calories');
+        expect(response.body.data).toHaveProperty('totalFat');
     });
 
-    // test to check if an error is returned when no image file is provided
+    // test to return an error if no image file is provided
     it('should return an error if no image file is provided', async () => {
         const response = await request(app)
             .post('/api/upload');
