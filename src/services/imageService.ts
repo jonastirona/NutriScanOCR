@@ -2,10 +2,12 @@ import { S3Client, PutObjectCommand } from '@aws-sdk/client-s3';
 import { Upload } from '@aws-sdk/lib-storage';
 import sharp from 'sharp';
 
+// class to preprocess and upload images to an S3 bucket
 export class ImageService {
     private s3: S3Client;
     private bucketName: string;
 
+    // initialize the S3 client and bucket name
     constructor() {
         this.s3 = new S3Client({ region: process.env.AWS_S3_BUCKET_REGION });
         this.bucketName = process.env.AWS_S3_BUCKET || '';
@@ -16,6 +18,7 @@ export class ImageService {
         }
     }
 
+    // preprocess an image using sharp
     async preprocessImage(buffer: Buffer): Promise<Buffer> {
         return sharp(buffer)
             .resize(1200, 1200, {
@@ -27,6 +30,7 @@ export class ImageService {
             .toBuffer();
     }
 
+    // upload an image to the S3 bucket
     async uploadImage(buffer: Buffer, filename: string): Promise<string> {
         const processedBuffer = await this.preprocessImage(buffer);
 

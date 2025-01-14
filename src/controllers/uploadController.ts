@@ -1,6 +1,7 @@
 import { Request, Response } from 'express';
 import { ImageService } from '../services/imageService';
 
+// controller class to handle image uploads
 export class UploadController {
     private imageService: ImageService;
 
@@ -8,6 +9,7 @@ export class UploadController {
         this.imageService = new ImageService();
     }
 
+    // method to upload an image
     async uploadImage(req: Request, res: Response): Promise<void> {
         try {
             if (!req.file) {
