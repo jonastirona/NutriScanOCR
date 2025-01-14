@@ -5,16 +5,16 @@ export class ParsingService {
 
         // regex patterns for key nutritional fields
         const patterns = {
-            calories: /calories\s*:\s*(\d+)/i,
-            totalFat: /total\s*fat\s*:\s*(\d+\.?\d*)\s*g/i,
-            saturatedFat: /saturated\s*fat\s*:\s*(\d+\.?\d*)\s*g/i,
-            cholesterol: /cholesterol\s*:\s*(\d+\.?\d*)\s*mg/i,
-            sodium: /sodium\s*:\s*(\d+\.?\d*)\s*mg/i,
-            totalCarbohydrates: /total\s*carbohydrates\s*:\s*(\d+\.?\d*)\s*g/i,
-            dietaryFiber: /dietary\s*fiber\s*:\s*(\d+\.?\d*)\s*g/i,
-            sugars: /sugars\s*:\s*(\d+\.?\d*)\s*g/i,
-            protein: /protein\s*:\s*(\d+\.?\d*)\s*g/i,
-            servingSize: /serving\s*size\s*:\s*(\d+\.?\d*)\s*g/i
+            calories: /calories\s*(\d+)/i,
+            totalFat: /total\s*fat\s*(\d+\.?\d*)\s*g/i,
+            saturatedFat: /saturated\s*fat\s*(\d+\.?\d*)\s*g/i,
+            cholesterol: /cholesterol\s*(\d+\.?\d*)\s*mg/i,
+            sodium: /sodium\s*(\d+\.?\d*)\s*mg/i,
+            totalCarbohydrates: /total\s*carbohydrate\s*(\d+\.?\d*)\s*g/i,
+            dietaryFiber: /dietary\s*fiber\s*(\d+\.?\d*)\s*g/i,
+            sugars: /total\s*sugars\s*(\d+\.?\d*)\s*g/i,
+            protein: /protein\s*(\d+\.?\d*)\s*g/i,
+            servingSize: /serving\s*size\s*(\d+\.?\d*)\s*g/i
         };
 
         // apply regex to text
