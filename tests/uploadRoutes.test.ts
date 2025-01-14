@@ -15,7 +15,7 @@ app.use('/api', uploadRoutes);
 // health check endpoint
 describe('POST /api/upload', () => {
     // test to check if the health check endpoint is working
-    it('should upload an image and return the image key', async () => {
+    it('should upload an image and return the extracted text', async () => {
         const imagePath = path.join(__dirname, 'test_image.jpeg');
         const imageBuffer = fs.readFileSync(imagePath);
 
@@ -24,8 +24,8 @@ describe('POST /api/upload', () => {
             .attach('image', imageBuffer, 'test_image.jpeg');
 
         expect(response.status).toBe(200);
-        expect(response.body).toHaveProperty('message', 'Image uploaded successfully');
-        expect(response.body).toHaveProperty('imageKey');
+        expect(response.body).toHaveProperty('message', 'Image uploaded and text extracted successfully');
+        expect(response.body).toHaveProperty('text');
     });
 
     // test to check if an error is returned when no image file is provided
