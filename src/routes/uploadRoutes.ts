@@ -4,7 +4,7 @@ import { UploadController } from '../controllers/uploadController';
 
 // create a new router
 const router = express.Router();
-const upload = multer({ storage: multer.memoryStorage() });
+const upload = multer({ storage: multer.memoryStorage(), limits: { fileSize: 5 * 1024 * 1024 } }); // 5MB limit
 const uploadController = new UploadController();
 
 // define upload routes
@@ -18,11 +18,17 @@ router.get('/parsed-data/:id',
 );
 
 router.post('/validate-data/:id', 
+    express.json({ limit: '1mb' }), // 1MB limit for JSON payload
     uploadController.validateData.bind(uploadController)
 );
 
 router.get('/health-check', 
     uploadController.healthCheck.bind(uploadController)
 );
+
+// handle invalid endpoints
+router.use((req, res) => {
+    res.status(404).json({ error: 'Endpoint not found' });
+});
 
 export default router;

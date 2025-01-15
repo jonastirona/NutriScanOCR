@@ -98,6 +98,86 @@ describe('POST /api/validate-data/:id', () => {
         expect(response.status).toBe(404);
         expect(response.body).toHaveProperty('error', 'Data not found');
     });
+
+    it('should return an error for invalid data types', async () => {
+        const imagePath = path.join(__dirname, 'test_image.jpeg');
+        const imageBuffer = fs.readFileSync(imagePath);
+
+        const uploadResponse = await request(app)
+            .post('/api/upload-label')
+            .attach('image', imageBuffer, 'test_image.jpeg');
+
+        const { id } = uploadResponse.body;
+
+        const updates = { calories: 'invalid' };
+
+        const response = await request(app)
+            .post(`/api/validate-data/${id}`)
+            .send(updates);
+
+        expect(response.status).toBe(400);
+        expect(response.body).toHaveProperty('error', 'Invalid data type for calories');
+    });
+
+    it('should return an error for missing required fields', async () => {
+        const imagePath = path.join(__dirname, 'test_image.jpeg');
+        const imageBuffer = fs.readFileSync(imagePath);
+
+        const uploadResponse = await request(app)
+            .post('/api/upload-label')
+            .attach('image', imageBuffer, 'test_image.jpeg');
+
+        const { id } = uploadResponse.body;
+
+        const updates = {};
+
+        const response = await request(app)
+            .post(`/api/validate-data/${id}`)
+            .send(updates);
+
+        expect(response.status).toBe(400);
+        expect(response.body).toHaveProperty('error', 'Missing required fields');
+    });
+
+    it('should handle boundary values for numerical inputs', async () => {
+        const imagePath = path.join(__dirname, 'test_image.jpeg');
+        const imageBuffer = fs.readFileSync(imagePath);
+
+        const uploadResponse = await request(app)
+            .post('/api/upload-label')
+            .attach('image', imageBuffer, 'test_image.jpeg');
+
+        const { id } = uploadResponse.body;
+
+        const updates = { calories: '0' };
+
+        const response = await request(app)
+            .post(`/api/validate-data/${id}`)
+            .send(updates);
+
+        expect(response.status).toBe(200);
+        expect(response.body.data).toHaveProperty('calories', '0');
+    });
+
+    it('should return an error for large payloads', async () => {
+        const imagePath = path.join(__dirname, 'test_image.jpeg');
+        const imageBuffer = fs.readFileSync(imagePath);
+
+        const uploadResponse = await request(app)
+            .post('/api/upload-label')
+            .attach('image', imageBuffer, 'test_image.jpeg');
+
+        const { id } = uploadResponse.body;
+
+        const updates = { calories: '200'.repeat(10000) };
+
+        const response = await request(app)
+            .post(`/api/validate-data/${id}`)
+            .send(updates);
+
+        expect(response.status).toBe(400);
+        expect(response.body).toHaveProperty('error', 'Invalid boundary value for calories. It should be in between 0 and 100000.');
+    });
 });
 
 // test the GET /api/health-check route
@@ -108,5 +188,16 @@ describe('GET /api/health-check', () => {
 
         expect(response.status).toBe(200);
         expect(response.body).toHaveProperty('status', 'API is healthy');
+    });
+});
+
+// test invalid endpoints
+describe('Invalid endpoints', () => {
+    it('should return an error for invalid endpoints', async () => {
+        const response = await request(app)
+            .get('/api/invalid-endpoint');
+
+        expect(response.status).toBe(404);
+        expect(response.body).toHaveProperty('error', 'Endpoint not found');
     });
 });
