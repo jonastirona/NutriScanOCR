@@ -1,0 +1,93 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Resources:
+  NutriScanOCRRole:
+    Type: 'AWS::IAM::Role'
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: 'Allow'
+            Principal:
+              Service: 'lambda.amazonaws.com'
+            Action: 'sts:AssumeRole'
+      Policies:
+        - PolicyName: 'NutriScanOCRPolicy'
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: 'Allow'
+                Action:
+                  - 's3:GetObject'
+                  - 's3:PutObject'
+                Resource: 'arn:aws:s3:::nutriscan-uploads-1/*'
+              - Effect: 'Allow'
+                Action:
+                  - 'logs:CreateLogGroup'
+                  - 'logs:CreateLogStream'
+                  - 'logs:PutLogEvents'
+                Resource: 'arn:aws:logs:*:*:*'
+
+  NutriScanOCRFunction:
+    Type: 'AWS::Lambda::Function'
+    Properties:
+      FunctionName: 'NutriScanOCR'
+      Handler: 'index.handler'
+      Role: !GetAtt NutriScanOCRRole.Arn
+      Code:
+        S3Bucket: 'nutriscan-lambda'
+        S3Key: 'function.zip'
+      Runtime: 'nodejs18.x'
+      Environment:
+        Variables:
+          S3_BUCKET: 'nutriscan-uploads-1'
+
+  NutriScanAPI:
+    Type: 'AWS::ApiGateway::RestApi'
+    Properties:
+      Name: 'NutriScanAPI'
+      Description: 'API for NutriScan OCR Service'
+
+  NutriScanResource:
+    Type: 'AWS::ApiGateway::Resource'
+    Properties:
+      ParentId: !GetAtt NutriScanAPI.RootResourceId
+      PathPart: 'process'
+      RestApiId: !Ref NutriScanAPI
+
+  NutriScanMethod:
+    Type: 'AWS::ApiGateway::Method'
+    Properties:
+      HttpMethod: 'POST'
+      ResourceId: !Ref NutriScanResource
+      RestApiId: !Ref NutriScanAPI
+      AuthorizationType: 'NONE'
+      Integration:
+        Type: 'AWS_PROXY'
+        IntegrationHttpMethod: 'POST'
+        Uri: !Sub 'arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${NutriScanOCRFunction.Arn}/invocations'
+
+  NutriScanDeployment:
+    Type: 'AWS::ApiGateway::Deployment'
+    DependsOn: NutriScanMethod
+    Properties:
+      RestApiId: !Ref NutriScanAPI
+
+  NutriScanStage:
+    Type: 'AWS::ApiGateway::Stage'
+    Properties:
+      DeploymentId: !Ref NutriScanDeployment
+      RestApiId: !Ref NutriScanAPI
+      StageName: 'prod'
+
+  LambdaPermission:
+    Type: 'AWS::Lambda::Permission'
+    Properties:
+      Action: 'lambda:InvokeFunction'
+      FunctionName: !Ref NutriScanOCRFunction
+      Principal: 'apigateway.amazonaws.com'
+      SourceArn: !Sub 'arn:aws:execute-api:${AWS::Region}:${AWS::AccountId}:${NutriScanAPI}/*'
+
+Outputs:
+  ApiEndpoint:
+    Description: 'API Gateway endpoint URL'
+    Value: !Sub 'https://${NutriScanAPI}.execute-api.${AWS::Region}.amazonaws.com/prod/process'
