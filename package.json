@@ -26,6 +26,7 @@
     "@aws-sdk/client-textract": "^3.726.1",
     "@aws-sdk/lib-storage": "^3.726.1",
     "aws-sdk": "^2.1692.0",
+    "aws-serverless-express": "^3.4.0",
     "dotenv": "^16.4.7",
     "express": "^4.21.2",
     "multer": "^1.4.5-lts.1",

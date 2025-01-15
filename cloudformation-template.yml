@@ -10,6 +10,8 @@ Resources:
             Principal:
               Service: 'lambda.amazonaws.com'
             Action: 'sts:AssumeRole'
+      ManagedPolicyArns:
+        - 'arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole'
       Policies:
         - PolicyName: 'NutriScanOCRPolicy'
           PolicyDocument:
@@ -26,6 +28,19 @@ Resources:
                   - 'logs:CreateLogStream'
                   - 'logs:PutLogEvents'
                 Resource: 'arn:aws:logs:*:*:*'
+              - Effect: 'Allow'
+                Action:
+                  - 'textract:DetectDocumentText'
+                Resource: '*'
+        - PolicyName: 'APIGatewayInvoke'
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: 'Allow'
+                Action:
+                  - 'execute-api:Invoke'
+                  - 'execute-api:ManageConnections'
+                Resource: '*'
 
   NutriScanOCRFunction:
     Type: 'AWS::Lambda::Function'
@@ -40,6 +55,8 @@ Resources:
       Environment:
         Variables:
           S3_BUCKET: 'nutriscan-uploads-1'
+      MemorySize: 1024
+      Timeout: 30
 
   NutriScanAPI:
     Type: 'AWS::ApiGateway::RestApi'
@@ -47,18 +64,39 @@ Resources:
       Name: 'NutriScanAPI'
       Description: 'API for NutriScan OCR Service'
 
-  NutriScanResource:
+  UploadLabelResource:
     Type: 'AWS::ApiGateway::Resource'
     Properties:
       ParentId: !GetAtt NutriScanAPI.RootResourceId
-      PathPart: 'process'
+      PathPart: 'upload-label'
       RestApiId: !Ref NutriScanAPI
 
-  NutriScanMethod:
+  ParsedDataResource:
+    Type: 'AWS::ApiGateway::Resource'
+    Properties:
+      ParentId: !GetAtt NutriScanAPI.RootResourceId
+      PathPart: 'parsed-data'
+      RestApiId: !Ref NutriScanAPI
+
+  ValidateDataResource:
+    Type: 'AWS::ApiGateway::Resource'
+    Properties:
+      ParentId: !GetAtt NutriScanAPI.RootResourceId
+      PathPart: 'validate-data'
+      RestApiId: !Ref NutriScanAPI
+
+  HealthCheckResource:
+    Type: 'AWS::ApiGateway::Resource'
+    Properties:
+      ParentId: !GetAtt NutriScanAPI.RootResourceId
+      PathPart: 'health-check'
+      RestApiId: !Ref NutriScanAPI
+
+  UploadLabelMethod:
     Type: 'AWS::ApiGateway::Method'
     Properties:
       HttpMethod: 'POST'
-      ResourceId: !Ref NutriScanResource
+      ResourceId: !Ref UploadLabelResource
       RestApiId: !Ref NutriScanAPI
       AuthorizationType: 'NONE'
       Integration:
@@ -66,9 +104,49 @@ Resources:
         IntegrationHttpMethod: 'POST'
         Uri: !Sub 'arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${NutriScanOCRFunction.Arn}/invocations'
 
+  ParsedDataMethod:
+    Type: 'AWS::ApiGateway::Method'
+    Properties:
+      HttpMethod: 'GET'
+      ResourceId: !Ref ParsedDataResource
+      RestApiId: !Ref NutriScanAPI
+      AuthorizationType: 'NONE'
+      Integration:
+        Type: 'AWS_PROXY'
+        IntegrationHttpMethod: 'GET'
+        Uri: !Sub 'arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${NutriScanOCRFunction.Arn}/invocations'
+
+  ValidateDataMethod:
+    Type: 'AWS::ApiGateway::Method'
+    Properties:
+      HttpMethod: 'POST'
+      ResourceId: !Ref ValidateDataResource
+      RestApiId: !Ref NutriScanAPI
+      AuthorizationType: 'NONE'
+      Integration:
+        Type: 'AWS_PROXY'
+        IntegrationHttpMethod: 'POST'
+        Uri: !Sub 'arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${NutriScanOCRFunction.Arn}/invocations'
+
+  HealthCheckMethod:
+    Type: 'AWS::ApiGateway::Method'
+    Properties:
+      HttpMethod: 'GET'
+      ResourceId: !Ref HealthCheckResource
+      RestApiId: !Ref NutriScanAPI
+      AuthorizationType: 'NONE'
+      Integration:
+        Type: 'AWS_PROXY'
+        IntegrationHttpMethod: 'GET'
+        Uri: !Sub 'arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${NutriScanOCRFunction.Arn}/invocations'
+
   NutriScanDeployment:
     Type: 'AWS::ApiGateway::Deployment'
-    DependsOn: NutriScanMethod
+    DependsOn: 
+      - UploadLabelMethod
+      - ParsedDataMethod
+      - ValidateDataMethod
+      - HealthCheckMethod
     Properties:
       RestApiId: !Ref NutriScanAPI
 
@@ -90,4 +168,4 @@ Resources:
 Outputs:
   ApiEndpoint:
     Description: 'API Gateway endpoint URL'
-    Value: !Sub 'https://${NutriScanAPI}.execute-api.${AWS::Region}.amazonaws.com/prod/process'
+    Value: !Sub 'https://${NutriScanAPI}.execute-api.${AWS::Region}.amazonaws.com/prod'
