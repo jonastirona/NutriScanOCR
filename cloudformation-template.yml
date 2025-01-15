@@ -1,4 +1,6 @@
 AWSTemplateFormatVersion: '2010-09-09'
+Description: CloudFormation template for NutriScan OCR service
+
 Resources:
   NutriScanOCRRole:
     Type: 'AWS::IAM::Role'
@@ -46,7 +48,7 @@ Resources:
     Type: 'AWS::Lambda::Function'
     Properties:
       FunctionName: 'NutriScanOCR'
-      Handler: 'index.handler'
+      Handler: 'index.lambdaHandler'
       Role: !GetAtt NutriScanOCRRole.Arn
       Code:
         S3Bucket: 'nutriscan-lambda'
@@ -54,7 +56,8 @@ Resources:
       Runtime: 'nodejs18.x'
       Environment:
         Variables:
-          S3_BUCKET: 'nutriscan-uploads-1'
+          AWS_S3_BUCKET: 'nutriscan-uploads-1'
+          AWS_S3_BUCKET_REGION: !Ref AWS::Region
       MemorySize: 1024
       Timeout: 30
 
@@ -78,11 +81,25 @@ Resources:
       PathPart: 'parsed-data'
       RestApiId: !Ref NutriScanAPI
 
+  ParsedDataIdResource:
+    Type: 'AWS::ApiGateway::Resource'
+    Properties:
+      ParentId: !Ref ParsedDataResource
+      PathPart: '{id}'
+      RestApiId: !Ref NutriScanAPI
+
   ValidateDataResource:
     Type: 'AWS::ApiGateway::Resource'
     Properties:
       ParentId: !GetAtt NutriScanAPI.RootResourceId
       PathPart: 'validate-data'
+      RestApiId: !Ref NutriScanAPI
+
+  ValidateDataIdResource:
+    Type: 'AWS::ApiGateway::Resource'
+    Properties:
+      ParentId: !Ref ValidateDataResource
+      PathPart: '{id}'
       RestApiId: !Ref NutriScanAPI
 
   HealthCheckResource:
@@ -108,25 +125,33 @@ Resources:
     Type: 'AWS::ApiGateway::Method'
     Properties:
       HttpMethod: 'GET'
-      ResourceId: !Ref ParsedDataResource
+      ResourceId: !Ref ParsedDataIdResource
       RestApiId: !Ref NutriScanAPI
       AuthorizationType: 'NONE'
+      RequestParameters:
+        'method.request.path.id': true
       Integration:
         Type: 'AWS_PROXY'
-        IntegrationHttpMethod: 'GET'
+        IntegrationHttpMethod: 'POST'
         Uri: !Sub 'arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${NutriScanOCRFunction.Arn}/invocations'
+        RequestParameters:
+          'integration.request.path.id': 'method.request.path.id'
 
   ValidateDataMethod:
     Type: 'AWS::ApiGateway::Method'
     Properties:
       HttpMethod: 'POST'
-      ResourceId: !Ref ValidateDataResource
+      ResourceId: !Ref ValidateDataIdResource
       RestApiId: !Ref NutriScanAPI
       AuthorizationType: 'NONE'
+      RequestParameters:
+        'method.request.path.id': true
       Integration:
         Type: 'AWS_PROXY'
         IntegrationHttpMethod: 'POST'
         Uri: !Sub 'arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${NutriScanOCRFunction.Arn}/invocations'
+        RequestParameters:
+          'integration.request.path.id': 'method.request.path.id'
 
   HealthCheckMethod:
     Type: 'AWS::ApiGateway::Method'
@@ -137,12 +162,12 @@ Resources:
       AuthorizationType: 'NONE'
       Integration:
         Type: 'AWS_PROXY'
-        IntegrationHttpMethod: 'GET'
+        IntegrationHttpMethod: 'POST'
         Uri: !Sub 'arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${NutriScanOCRFunction.Arn}/invocations'
 
   NutriScanDeployment:
     Type: 'AWS::ApiGateway::Deployment'
-    DependsOn: 
+    DependsOn:
       - UploadLabelMethod
       - ParsedDataMethod
       - ValidateDataMethod
@@ -163,7 +188,31 @@ Resources:
       Action: 'lambda:InvokeFunction'
       FunctionName: !Ref NutriScanOCRFunction
       Principal: 'apigateway.amazonaws.com'
-      SourceArn: !Sub 'arn:aws:execute-api:${AWS::Region}:${AWS::AccountId}:${NutriScanAPI}/*'
+      SourceArn: !Sub 'arn:aws:execute-api:${AWS::Region}:${AWS::AccountId}:${NutriScanAPI}/*/POST/upload-label'
+
+  LambdaPermissionGetParsedData:
+    Type: 'AWS::Lambda::Permission'
+    Properties:
+      Action: 'lambda:InvokeFunction'
+      FunctionName: !Ref NutriScanOCRFunction
+      Principal: 'apigateway.amazonaws.com'
+      SourceArn: !Sub 'arn:aws:execute-api:${AWS::Region}:${AWS::AccountId}:${NutriScanAPI}/*/GET/parsed-data/*'
+
+  LambdaPermissionValidateData:
+    Type: 'AWS::Lambda::Permission'
+    Properties:
+      Action: 'lambda:InvokeFunction'
+      FunctionName: !Ref NutriScanOCRFunction
+      Principal: 'apigateway.amazonaws.com'
+      SourceArn: !Sub 'arn:aws:execute-api:${AWS::Region}:${AWS::AccountId}:${NutriScanAPI}/*/POST/validate-data/*'
+
+  LambdaPermissionHealthCheck:
+    Type: 'AWS::Lambda::Permission'
+    Properties:
+      Action: 'lambda:InvokeFunction'
+      FunctionName: !Ref NutriScanOCRFunction
+      Principal: 'apigateway.amazonaws.com'
+      SourceArn: !Sub 'arn:aws:execute-api:${AWS::Region}:${AWS::AccountId}:${NutriScanAPI}/*/GET/health-check'
 
 Outputs:
   ApiEndpoint:

@@ -8,7 +8,9 @@
     "dev": "nodemon src/app.ts",
     "build": "tsc",
     "test": "jest",
-    "lint": "eslint . --ext .ts"
+    "lint": "eslint . --ext .ts",
+    "package": "npm run build && zip -r function.zip dist node_modules package.json index.ts",
+    "deploy": "npm run package && aws cloudformation deploy --template-file cloudformation-template.yml --stack-name NutriScanOCRStack --capabilities CAPABILITY_IAM"
   },
   "repository": {
     "type": "git",
@@ -25,11 +27,14 @@
     "@aws-sdk/client-s3": "^3.726.1",
     "@aws-sdk/client-textract": "^3.726.1",
     "@aws-sdk/lib-storage": "^3.726.1",
+    "@types/aws-lambda": "^8.10.147",
+    "aws-lambda": "^1.0.7",
     "aws-sdk": "^2.1692.0",
     "aws-serverless-express": "^3.4.0",
     "dotenv": "^16.4.7",
     "express": "^4.21.2",
     "multer": "^1.4.5-lts.1",
+    "serverless-http": "^3.2.0",
     "sharp": "^0.33.5"
   },
   "devDependencies": {
