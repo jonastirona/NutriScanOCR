@@ -19,18 +19,22 @@ functions:
           path: upload-label
           method: post
           cors: true
+          private: false
       - http:
           path: parsed-data/{id}
           method: get
           cors: true
+          private: false
       - http:
           path: validate-data/{id}
           method: post
           cors: true
+          private: false
       - http:
           path: health-check
           method: get
           cors: true
+          private: false
 
 plugins:
   - serverless-offline
