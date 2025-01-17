@@ -9,7 +9,7 @@
     "build": "tsc",
     "test": "jest",
     "lint": "eslint . --ext .ts",
-    "package": "npm run build && zip -r function.zip dist node_modules package.json index.ts",
+    "package": "npm run build && zip -r function.zip dist/* node_modules",
     "deploy": "npm run package && aws cloudformation deploy --template-file cloudformation-template.yml --stack-name NutriScanOCRStack --capabilities CAPABILITY_IAM"
   },
   "repository": {
@@ -46,8 +46,11 @@
     "@types/supertest": "^6.0.2",
     "jest": "^29.7.0",
     "nodemon": "^3.1.9",
+    "serverless-offline": "^14.4.0",
     "supertest": "^7.0.0",
     "ts-jest": "^29.2.5",
-    "typescript": "^5.7.3"
+    "typescript": "^5.7.3",
+    "webpack": "^5.97.1",
+    "webpack-node-externals": "^3.0.0"
   }
 }

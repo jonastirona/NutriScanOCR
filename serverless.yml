@@ -1,0 +1,59 @@
+service: nutriscan-api
+
+provider:
+  name: aws
+  runtime: nodejs18.x
+  region: us-east-1
+  memorySize: 512
+  timeout: 29
+  environment:
+    AWS_S3_BUCKET: nutriscan-lambda
+  deploymentBucket:
+    name: nutriscan-lambda
+
+functions:
+  api:
+    handler: dist/index.lambdaHandler
+    events:
+      - http:
+          path: upload-label
+          method: post
+          cors: true
+      - http:
+          path: parsed-data/{id}
+          method: get
+          cors: true
+      - http:
+          path: validate-data/{id}
+          method: post
+          cors: true
+      - http:
+          path: health-check
+          method: get
+          cors: true
+
+plugins:
+  - serverless-offline
+
+package:
+  individually: true
+  patterns:
+    - 'node_modules/**'
+    - 'dist/**'
+    - '!tests/**'
+    - '!jest.config.js'
+    - '!function.zip'
+
+custom:
+  serverless-offline:
+    httpPort: 4000
+  esbuild:
+    bundle: true
+    minify: false
+    sourcemap: true
+    exclude: ['aws-sdk']
+    target: 'node18'
+    define:
+      'require.resolve': undefined
+    platform: 'node'
+    concurrency: 10
