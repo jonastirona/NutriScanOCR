@@ -14,11 +14,12 @@ export class UploadController {
 
     // method to upload an image and extract text
     async uploadImage(req: Request, res: Response): Promise<void> {
+        if (!req.file) {
+            res.status(400).json({ error: 'No image file provided' });
+            return;
+        }
         try {
-            if (!req.file) {
-                res.status(400).json({ error: 'No image file provided' });
-                return;
-            }
+            console.log('File received:', req.file);
 
             const uniqueId = Date.now().toString(); // generate a unique ID
             const parsedData = await this.imageService.uploadImage(
