@@ -18,44 +18,41 @@ functions:
       - http:
           path: upload-label
           method: post
-          cors: true
-      - http:
-          path: upload-label # Add ANY method
-          method: any
-          cors: true
+          cors:
+            origin: '*'
+            headers:
+              - Content-Type
+              - X-Amz-Date
+              - Authorization
+              - X-Api-Key
+              - X-Amz-Security-Token
+              - X-Amz-User-Agent
+            allowMethods:
+              - POST
+              - OPTIONS
+            allowCredentials: false
       - http:
           path: parsed-data/{id}
           method: get
-          cors: true
-      - http:
-          path: parsed-data/{id} # Add ANY method
-          method: any
           cors: true
       - http:
           path: validate-data/{id}
           method: post
           cors: true
       - http:
-          path: validate-data/{id} # Add ANY method
-          method: any
-          cors: true
-      - http:
           path: health-check
           method: get
-          cors: true
-      - http:
-          path: health-check # Add ANY method
-          method: any
           cors: true
 
 plugins:
   - serverless-offline
+  - serverless-esbuild
 
 package:
   individually: true
   patterns:
-    - 'node_modules/**'
-    - 'dist/**'
+    - 'node_modules/'
+    - 'dist/'
     - '!tests/**'
     - '!jest.config.js'
     - '!function.zip'
