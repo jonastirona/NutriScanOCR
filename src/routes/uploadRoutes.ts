@@ -15,22 +15,22 @@ const logRequestSize = (req: express.Request, res: express.Response, next: expre
 };
 
 // define upload routes
-router.post('/upload-label', 
+router.post('/upload-label',
     logRequestSize,
-    upload.single('image'), 
+    upload.single('image'),
     uploadController.uploadImage.bind(uploadController)
 );
 
-router.get('/parsed-data/:id', 
+router.get('/parsed-data/:id',
     uploadController.getParsedData.bind(uploadController)
 );
 
-router.post('/validate-data/:id', 
+router.post('/validate-data/:id',
     express.json({ limit: '1mb' }),
     uploadController.validateData.bind(uploadController)
 );
 
-router.get('/health-check', 
+router.get('/health-check',
     uploadController.healthCheck.bind(uploadController)
 );
 

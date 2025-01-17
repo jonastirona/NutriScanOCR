@@ -20,16 +20,32 @@ functions:
           method: post
           cors: true
       - http:
+          path: upload-label # Add ANY method
+          method: any
+          cors: true
+      - http:
           path: parsed-data/{id}
           method: get
+          cors: true
+      - http:
+          path: parsed-data/{id} # Add ANY method
+          method: any
           cors: true
       - http:
           path: validate-data/{id}
           method: post
           cors: true
       - http:
+          path: validate-data/{id} # Add ANY method
+          method: any
+          cors: true
+      - http:
           path: health-check
           method: get
+          cors: true
+      - http:
+          path: health-check # Add ANY method
+          method: any
           cors: true
 
 plugins:
