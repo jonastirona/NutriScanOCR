@@ -7,8 +7,16 @@ const router = express.Router();
 const upload = multer({ storage: multer.memoryStorage(), limits: { fileSize: 5 * 1024 * 1024 } }); // 5MB limit
 const uploadController = new UploadController();
 
+// middleware to log request size
+const logRequestSize = (req: express.Request, res: express.Response, next: express.NextFunction) => {
+    const contentLength = req.headers['content-length'];
+    console.log(`Request size: ${contentLength} bytes`);
+    next();
+};
+
 // define upload routes
 router.post('/upload-label', 
+    logRequestSize,
     upload.single('image'), 
     uploadController.uploadImage.bind(uploadController)
 );
@@ -18,7 +26,7 @@ router.get('/parsed-data/:id',
 );
 
 router.post('/validate-data/:id', 
-    express.json({ limit: '1mb' }), // 1MB limit for JSON payload
+    express.json({ limit: '1mb' }),
     uploadController.validateData.bind(uploadController)
 );
 
