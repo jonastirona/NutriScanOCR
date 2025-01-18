@@ -3,6 +3,7 @@ import { Upload } from '@aws-sdk/lib-storage';
 import sharp from 'sharp';
 import { TextractClient, DetectDocumentTextCommand } from '@aws-sdk/client-textract';
 import { ParsingService } from './parsingService';
+import { fileTypeFromBuffer } from 'file-type';
 
 // service class to handle image processing and text extraction
 export class ImageService {
@@ -25,6 +26,11 @@ export class ImageService {
     // method to preprocess an image using sharp
     async preprocessImage(buffer: Buffer): Promise<Buffer> {
         try {
+            const type = await fileTypeFromBuffer(buffer);
+            if (!type || !['image/jpeg', 'image/png'].includes(type.mime)) {
+                throw new Error('Unsupported image format');
+            }
+    
             return await sharp(buffer)
                 .resize(1200, 1200, {
                     fit: 'inside',
