@@ -1,9 +1,9 @@
-import { S3Client, PutObjectCommand } from '@aws-sdk/client-s3';
+import { S3Client } from '@aws-sdk/client-s3';
 import { Upload } from '@aws-sdk/lib-storage';
-import Jimp from 'jimp';
 import { TextractClient, DetectDocumentTextCommand } from '@aws-sdk/client-textract';
 import { ParsingService } from './parsingService';
 import { fromBuffer as fileTypeFromBuffer } from 'file-type';
+const Jimp = require('jimp');
 
 // service class to handle image processing and text extraction
 export class ImageService {
@@ -27,14 +27,23 @@ export class ImageService {
     async preprocessImage(buffer: Buffer): Promise<Buffer> {
         try {
             const type = await fileTypeFromBuffer(buffer);
-            if (!type || !['image/jpeg', 'image/png'].includes(type.mime)) {
+            if (!type || !['image/jpeg', 'image/png', 'image/bmp', 'image/tiff', 'image/gif'].includes(type.mime)) {
                 throw new Error('Unsupported image format');
             }
 
             const image = await Jimp.read(buffer);
-            image.resize(1200, Jimp.AUTO).normalize().quality(80);
+            
+            // Resize the image to width 1200
+            image.resize(1200, image.getHeight());
+            image.normalize();
+            image.quality(80);
 
-            return await image.getBufferAsync(Jimp.MIME_JPEG);
+            return await new Promise<Buffer>((resolve, reject) => {
+                image.getBuffer(type.mime, (err: Error | null, processedBuffer: Buffer) => {
+                    if (err) reject(err);
+                    else resolve(processedBuffer);
+                });
+            });
         } catch (error) {
             console.error('Jimp processing error:', error);
             throw new Error('Failed to process image with Jimp');
@@ -49,7 +58,7 @@ export class ImageService {
             Bucket: this.bucketName,
             Key: `uploads/${Date.now()}-${filename}`,
             Body: processedBuffer,
-            ContentType: mimetype // Use the mimetype passed from the controller
+            ContentType: mimetype
         };
 
         const upload = new Upload({
