@@ -27,6 +27,8 @@ export class ImageService {
     async preprocessImage(buffer: Buffer): Promise<Buffer> {
         try {
             const type = await fileTypeFromBuffer(buffer);
+            console.log('Detected file type:', type);
+
             if (!type || !['image/jpeg', 'image/png', 'image/bmp', 'image/tiff', 'image/gif'].includes(type.mime)) {
                 throw new Error('Unsupported image format');
             }
@@ -45,6 +47,9 @@ export class ImageService {
 
     // method to upload an image to S3 and extract text using textract
     async uploadImage(buffer: Buffer, filename: string, mimetype: string): Promise<Record<string, string>> {
+        console.log('Received buffer size:', buffer.length);
+        console.log('Received buffer content:', buffer.slice(0, 20)); // Log the first 20 bytes of the buffer
+
         const processedBuffer = await this.preprocessImage(buffer);
 
         const params = {
