@@ -3,7 +3,12 @@ import { Upload } from '@aws-sdk/lib-storage';
 import { TextractClient, DetectDocumentTextCommand } from '@aws-sdk/client-textract';
 import { ParsingService } from './parsingService';
 import { fromBuffer as fileTypeFromBuffer } from 'file-type';
-const Jimp = require('jimp');
+import { execFile } from 'child_process';
+import { promisify } from 'util';
+import * as fs from 'fs';
+import * as path from 'path';
+
+const execFileAsync = promisify(execFile);
 
 // service class to handle image processing and text extraction
 export class ImageService {
@@ -23,7 +28,7 @@ export class ImageService {
         }
     }
 
-    // method to preprocess an image using jimp
+    // method to preprocess an image using imagemagick
     async preprocessImage(buffer: Buffer): Promise<Buffer> {
         try {
             const type = await fileTypeFromBuffer(buffer);
@@ -31,22 +36,18 @@ export class ImageService {
                 throw new Error('Unsupported image format');
             }
 
-            const image = await Jimp.read(buffer);
-            
-            // Resize the image to width 1200
-            image.resize(1200, image.getHeight());
-            image.normalize();
-            image.quality(80);
+            const inputPath = path.join('/tmp', `input_image.${type.ext}`);
+            const outputPath = path.join('/tmp', 'output_image.jpg');
 
-            return await new Promise<Buffer>((resolve, reject) => {
-                image.getBuffer(type.mime, (err: Error | null, processedBuffer: Buffer) => {
-                    if (err) reject(err);
-                    else resolve(processedBuffer);
-                });
-            });
+            await fs.promises.writeFile(inputPath, buffer);
+
+            await execFileAsync('magick', [inputPath, '-resize', '1200x', outputPath]);
+
+            const processedBuffer = await fs.promises.readFile(outputPath);
+            return processedBuffer;
         } catch (error) {
-            console.error('Jimp processing error:', error);
-            throw new Error('Failed to process image with Jimp');
+            console.error('ImageMagick processing error:', error);
+            throw new Error('Failed to process image with ImageMagick');
         }
     }
 
