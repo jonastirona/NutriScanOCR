@@ -3,12 +3,7 @@ import { Upload } from '@aws-sdk/lib-storage';
 import { TextractClient, DetectDocumentTextCommand } from '@aws-sdk/client-textract';
 import { ParsingService } from './parsingService';
 import { fromBuffer as fileTypeFromBuffer } from 'file-type';
-import { execFile } from 'child_process';
-import { promisify } from 'util';
-import * as fs from 'fs';
-import * as path from 'path';
-
-const execFileAsync = promisify(execFile);
+import sharp from 'sharp';
 
 // service class to handle image processing and text extraction
 export class ImageService {
@@ -28,7 +23,7 @@ export class ImageService {
         }
     }
 
-    // method to preprocess an image using imagemagick
+    // method to preprocess an image using sharp
     async preprocessImage(buffer: Buffer): Promise<Buffer> {
         try {
             const type = await fileTypeFromBuffer(buffer);
@@ -36,18 +31,15 @@ export class ImageService {
                 throw new Error('Unsupported image format');
             }
 
-            const inputPath = path.join('/tmp', `input_image.${type.ext}`);
-            const outputPath = path.join('/tmp', 'output_image.jpg');
+            const processedBuffer = await sharp(buffer)
+                .resize({ width: 1200, withoutEnlargement: true }) // Resize to a maximum width of 1200, maintaining aspect ratio
+                .jpeg({ quality: 90 }) // Convert to JPEG with quality 90
+                .toBuffer();
 
-            await fs.promises.writeFile(inputPath, buffer);
-
-            await execFileAsync('magick', [inputPath, '-resize', '1200x', outputPath]);
-
-            const processedBuffer = await fs.promises.readFile(outputPath);
             return processedBuffer;
         } catch (error) {
-            console.error('ImageMagick processing error:', error);
-            throw new Error('Failed to process image with ImageMagick');
+            console.error('Sharp image processing error:', error);
+            throw new Error('Failed to process image with Sharp');
         }
     }
 
@@ -59,7 +51,7 @@ export class ImageService {
             Bucket: this.bucketName,
             Key: `uploads/${Date.now()}-${filename}`,
             Body: processedBuffer,
-            ContentType: mimetype
+            ContentType: 'image/jpeg' // Set content type to JPEG after processing
         };
 
         const upload = new Upload({
