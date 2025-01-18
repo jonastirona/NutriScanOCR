@@ -1,6 +1,6 @@
 import { S3Client, PutObjectCommand } from '@aws-sdk/client-s3';
 import { Upload } from '@aws-sdk/lib-storage';
-import sharp from 'sharp';
+import Jimp from 'jimp';
 import { TextractClient, DetectDocumentTextCommand } from '@aws-sdk/client-textract';
 import { ParsingService } from './parsingService';
 import { fromBuffer as fileTypeFromBuffer } from 'file-type';
@@ -23,7 +23,7 @@ export class ImageService {
         }
     }
 
-    // method to preprocess an image using sharp
+    // method to preprocess an image using jimp
     async preprocessImage(buffer: Buffer): Promise<Buffer> {
         try {
             const type = await fileTypeFromBuffer(buffer);
@@ -31,17 +31,13 @@ export class ImageService {
                 throw new Error('Unsupported image format');
             }
 
-            return await sharp(buffer)
-                .resize(1200, 1200, {
-                    fit: 'inside',
-                    withoutEnlargement: true
-                })
-                .normalize()
-                .sharpen()
-                .toBuffer();
+            const image = await Jimp.read(buffer);
+            image.resize(1200, Jimp.AUTO).normalize().quality(80);
+
+            return await image.getBufferAsync(Jimp.MIME_JPEG);
         } catch (error) {
-            console.error('Sharp processing error:', error);
-            throw new Error('Failed to process image with sharp');
+            console.error('Jimp processing error:', error);
+            throw new Error('Failed to process image with Jimp');
         }
     }
 
