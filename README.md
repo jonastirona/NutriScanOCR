@@ -1,34 +1,29 @@
 # NutriScanOCR 🔍
 
-> Transform food label images into structured nutritional data with serverless OCR technology
-
-## Overview
-
 NutriScanOCR is a powerful serverless API that extracts nutritional information from food label images using advanced OCR technology and intelligent text parsing. Built with AWS Lambda and Textract, it provides accurate, structured data for calories, macronutrients, vitamins, minerals, and serving sizes.
 
-## Key Features
+## ✨ Key Features
 
 - **Serverless Architecture**: Highly scalable AWS Lambda-based solution with automatic scaling
 - **Advanced Image Processing**: 
-  - Automatic image optimization and enhancement
-  - Support for JPEG, PNG, BMP, TIFF, and GIF formats
-  - Smart cropping and rotation correction
+  - 📸 Automatic image optimization and enhancement
+  - 🖼️ Support for JPEG, PNG, BMP, TIFF, and GIF formats
+  - ✂️ Smart cropping and rotation correction
 - **Comprehensive Nutrient Detection**:
-  - Macronutrients (proteins, fats, carbohydrates)
-  - Detailed fat breakdown (saturated, trans, poly/monounsaturated)
-  - Vitamins and minerals
-  - Serving size information
+  - 🍗 Macronutrients (proteins, fats, carbohydrates)
+  - 🥕 Vitamins and minerals
+  - 🍽️ Serving size information
 - **Data Validation & Correction**:
-  - Boundary value checking
-  - Unit standardization
-  - Manual correction capabilities
+  - ✅ Boundary value checking
+  - 📏 Unit standardization
+  - ✏️ Manual correction capabilities
 - **Developer-Friendly**:
-  - RESTful API interface
-  - Comprehensive error handling
-  - CORS support
-  - Detailed response formatting
+  - 🌐 RESTful API interface
+  - 🚦 Comprehensive error handling
+  - 🔓 CORS support
+  - 📄 Detailed response formatting
 
-## Technologies Used
+## 🛠️ Technologies Used
 
 - Backend
 
@@ -60,7 +55,7 @@ NutriScanOCR is a powerful serverless API that extracts nutritional information 
 
   - ![Supertest](https://img.shields.io/badge/Supertest-7.0.0-green)
 
-## Installation
+## 📦 Installation
 
 ### Prerequisites
 
@@ -98,7 +93,7 @@ PORT=3000
 npm run build
 ```
 
-## Usage
+## 🚀 Usage
 
 ### Quick Start
 
@@ -162,11 +157,11 @@ const { status } = await response.json();
 - `POST /validate-data/:id`: Update/correct parsed data
 - `GET /health-check`: API health status
 
-## Configuration
+## ⚙️ Configuration
 
 ### AWS Configuration
 
-Update `serverless.yml` for custom AWS configuration:
+Update [`serverless.yml`](command:_github.copilot.openRelativePath?%5B%7B%22scheme%22%3A%22file%22%2C%22authority%22%3A%22%22%2C%22path%22%3A%22%2FUsers%2Fjonastirona%2FDocuments%2FNutriScanOCR%2Fserverless.yml%22%2C%22query%22%3A%22%22%2C%22fragment%22%3A%22%22%7D%5D "/Users/jonastirona/Documents/NutriScanOCR/serverless.yml") for custom AWS configuration:
 
 ```yaml
 provider:
@@ -188,7 +183,7 @@ const processedBuffer = await sharp(buffer)
     .toBuffer();
 ```
 
-## Contributing
+## 🤝 Contributing 
 
 Please contribute! Please follow these steps:
 
@@ -198,7 +193,7 @@ Please contribute! Please follow these steps:
 4. Push to the branch: `git push origin feature/new-feature`
 5. Open a Pull Request
 
-## Testing
+## 🧪 Testing
 
 Run the test suite:
 ```bash
@@ -210,7 +205,7 @@ Run with coverage:
 npm test -- --coverage
 ```
 
-## Deployment
+## 🚢 Deployment
 
 1. Package the application:
 ```bash
@@ -222,16 +217,16 @@ npm run package
 npm run deploy
 ```
 
-## Future Developments
+## 🔮 Future Developments
 
-- [ ] Machine learning enhancement for non-standard label formats
-- [ ] Support for multiple languages
-- [ ] Ingredient list parsing and allergen detection
-- [ ] Batch processing capabilities
-- [ ] Integration with popular nutrition apps
-- [ ] Real-time image processing feedback
+- [ ] 🤖 Machine learning enhancement for non-standard label formats
+- [ ] 🌐 Support for multiple languages
+- [ ] 📝 Ingredient list parsing and allergen detection
+- [ ] 📦 Batch processing capabilities
+- [ ] 📱 Integration with popular nutrition apps
+- [ ] ⚡ Real-time image processing feedback
 
-## Troubleshooting
+## 🛠️ Troubleshooting
 
 ### Common Issues
 
@@ -250,6 +245,6 @@ npm run deploy
    - Check IAM roles and permissions
    - Ensure all environment variables are set
 
-## License
+## 📄 License
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
