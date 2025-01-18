@@ -21,6 +21,11 @@ export class UploadController {
         try {
             console.log('File received:', req.file);
 
+            // Validate the buffer
+            if (!Buffer.isBuffer(req.file.buffer)) {
+                throw new Error('Invalid buffer');
+            }
+
             const uniqueId = Date.now().toString(); // generate a unique ID
             const parsedData = await this.imageService.uploadImage(
                 req.file.buffer,
