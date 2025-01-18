@@ -7,7 +7,7 @@ const router = express.Router();
 const upload = multer({ storage: multer.memoryStorage(), limits: { fileSize: 10 * 1024 * 1024 } });
 const uploadController = new UploadController();
 
-// Middleware to log file details
+// middleware to log file details
 const logFileDetails = (req: express.Request, res: express.Response, next: express.NextFunction) => {
     if (req.file) {
         console.log('File received by multer:');
