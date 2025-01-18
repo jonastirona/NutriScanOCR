@@ -23,9 +23,11 @@ export class ImageService {
         }
     }
 
-    // method to preprocess an image using sharp
     async preprocessImage(buffer: Buffer): Promise<Buffer> {
         try {
+            // Log the first few bytes of the buffer for debugging
+            console.log('Buffer head (first 20 bytes):', buffer.subarray(0, 20)); // Corrected to use subarray
+
             const type = await fileTypeFromBuffer(buffer);
             console.log('Detected file type:', type);
 
@@ -34,8 +36,8 @@ export class ImageService {
             }
 
             const processedBuffer = await sharp(buffer)
-                .resize({ width: 1200, withoutEnlargement: true }) // Resize to a maximum width of 1200, maintaining aspect ratio
-                .jpeg({ quality: 90 }) // Convert to JPEG with quality 90
+                .resize({ width: 1200, withoutEnlargement: true })
+                .jpeg({ quality: 90 })
                 .toBuffer();
 
             return processedBuffer;
@@ -48,7 +50,6 @@ export class ImageService {
     // method to upload an image to S3 and extract text using textract
     async uploadImage(buffer: Buffer, filename: string, mimetype: string): Promise<Record<string, string>> {
         console.log('Received buffer size:', buffer.length);
-        console.log('Received buffer content:', buffer.slice(0, 20)); // Log the first 20 bytes of the buffer
 
         const processedBuffer = await this.preprocessImage(buffer);
 
