@@ -21,7 +21,7 @@ export class UploadController {
         try {
             console.log('File received:', req.file);
 
-            // Validate the buffer
+            // validate the buffer
             if (!Buffer.isBuffer(req.file.buffer)) {
                 throw new Error('Invalid buffer');
             }
