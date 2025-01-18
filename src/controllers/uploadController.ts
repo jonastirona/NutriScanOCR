@@ -26,10 +26,14 @@ export class UploadController {
                 throw new Error('Invalid buffer');
             }
 
+            // Log the first few bytes of the buffer to inspect its content
+            console.log('Buffer content:', req.file.buffer.slice(0, 20));
+
             const uniqueId = Date.now().toString(); // generate a unique ID
             const parsedData = await this.imageService.uploadImage(
                 req.file.buffer,
-                req.file.originalname
+                req.file.originalname,
+                req.file.mimetype
             );
 
             parsedDataStore[uniqueId] = parsedData;

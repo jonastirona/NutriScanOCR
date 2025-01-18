@@ -24,25 +24,30 @@ export class ImageService {
 
     // method to preprocess an image using sharp
     async preprocessImage(buffer: Buffer): Promise<Buffer> {
-        return sharp(buffer)
-            .resize(1200, 1200, {
-                fit: 'inside',
-                withoutEnlargement: true
-            })
-            .normalize()
-            .sharpen()
-            .toBuffer();
+        try {
+            return await sharp(buffer)
+                .resize(1200, 1200, {
+                    fit: 'inside',
+                    withoutEnlargement: true
+                })
+                .normalize()
+                .sharpen()
+                .toBuffer();
+        } catch (error) {
+            console.error('Sharp processing error:', error);
+            throw new Error('Failed to process image with sharp');
+        }
     }
 
     // method to upload an image to S3 and extract text using textract
-    async uploadImage(buffer: Buffer, filename: string): Promise<Record<string, string>> {
+    async uploadImage(buffer: Buffer, filename: string, mimetype: string): Promise<Record<string, string>> {
         const processedBuffer = await this.preprocessImage(buffer);
 
         const params = {
             Bucket: this.bucketName,
             Key: `uploads/${Date.now()}-${filename}`,
             Body: processedBuffer,
-            ContentType: 'image/jpeg'
+            ContentType: mimetype // Use the mimetype passed from the controller
         };
 
         const upload = new Upload({
