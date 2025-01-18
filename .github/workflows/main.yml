@@ -21,6 +21,9 @@ jobs:
 
     - name: Install ImageMagick
       run: sudo apt-get update && sudo apt-get install -y imagemagick
+
+    - name: Verify ImageMagick installation
+      run: magick --version
       
     - name: Build
       run: npm run build
