@@ -2,6 +2,10 @@
 
 NutriScanOCR is a powerful serverless API that extracts nutritional information from food label images using advanced OCR technology and intelligent text parsing. Built with AWS Lambda and Textract, it provides accurate, structured data for calories, macronutrients, vitamins, minerals, and serving sizes.
 
+## 🎯 Purpose
+
+NutriScanOCR provides fast and accurate digitization of nutritional information from food packaging. While barcodes can provide the same data, they could be damaged, torn off, or link to outdated information in databases. NutriScanOCR directly extracts current nutritional data from product labels, making it valuable for nutrition apps and meal planning systems that need reliable, up-to-date information without manual data entry. The API's intelligent parsing ensures accurate data extraction across different label formats, making nutritional tracking and analysis much more convenient.
+
 ## ✨ Key Features
 
 - **Serverless Architecture**: Highly scalable AWS Lambda-based solution with automatic scaling
